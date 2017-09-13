@@ -52,7 +52,7 @@ end
 
 mutable struct Node
     move::Tuple{Int64, Int64}
-    parent
+    parent::Nullable{Node}
     children::Vector{Node}
     wins::Int64
     visits::Int64
@@ -73,7 +73,7 @@ function uct_select_child(node)
 end
 
 function add_child(node, move, state)
-    n = Node(move, node, state)
+    n = Node(move, Nullable(node), state)
     deleteat!(node.untried_moves, findin(node.untried_moves, [move]))
     push!(node.children, n)
     n
@@ -85,7 +85,7 @@ function update(node, result)
 end
 
 function uct(rootstate, itermax)
-    rootnode = Node((0,0), false, rootstate)
+    rootnode = Node((0,0), Nullable(), rootstate)
     for i in 1:itermax
         node = rootnode
         state = clone(rootstate)
@@ -105,9 +105,12 @@ function uct(rootstate, itermax)
             make_move(state, rand(get_moves(state)))
         end
 
-        while node != false
+        while true
             update(node, get_result(state, node.just_moved))
-            node = node.parent
+            if isnull(node.parent)
+               break
+             end
+            node = get(node.parent)
         end
     end
 
