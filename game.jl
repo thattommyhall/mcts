@@ -28,8 +28,8 @@ end
 
 function get_moves(state)
     result = Tuple{Int64, Int64}[]
-    for stack in 1:length(state.chips)
-        for count in 1:state.chips[stack]
+    for (stack, chips) in enumerate(state.chips)
+        for count in 1:chips
             push!(result, (stack, count))
         end
     end
