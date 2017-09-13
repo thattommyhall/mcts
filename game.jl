@@ -67,9 +67,15 @@ Node(move,parent,state) = Node(move,
                                0,
                                get_moves(state),
                                state.just_moved)
+                               
+function score(node, parent_visits)
+  node.wins/node.visits + sqrt(2*log(parent_visits)/node.visits)
+end
 
 function uct_select_child(node)
-    sort(node.children, by=c->c.wins/c.visits + sqrt(2*log(node.visits)/c.visits))[end]
+    reduce(node.children) do a,b
+      score(a, node.visits) > score(b, node.visits) ? a : b
+    end
 end
 
 function add_child(node, move, state)
@@ -113,8 +119,11 @@ function uct(rootstate, itermax)
             node = get(node.parent)
         end
     end
-
-    sort(rootnode.children, by=c->c.visits)[end].move
+    
+    best_node = reduce(rootnode.children) do a,b
+      a.visits > b.visits ? a : b
+    end
+    best_node.move
 end
 
 function play_game(init)
