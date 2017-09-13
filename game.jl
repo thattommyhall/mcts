@@ -50,13 +50,11 @@ mutable struct Node
     just_moved::Int64
 end
 
-Node(move,parent,state) = Node(move,
-                               parent,
-                               Node[],
-                               0,
-                               0,
-                               get_moves(state),
-                               state.just_moved)
+function Node(move,parent,state) 
+  moves = get_moves(state)
+  shuffle!(moves)
+  Node(move, parent, Node[], 0, 0, moves, state.just_moved)
+end
                                
 function score(node, parent_visits)
   node.wins/node.visits + sqrt(2*log(parent_visits)/node.visits)
@@ -70,7 +68,6 @@ end
 
 function add_child(node, move, state)
     n = Node(move, Nullable(node), state)
-    deleteat!(node.untried_moves, findin(node.untried_moves, [move]))
     push!(node.children, n)
     n
 end
@@ -92,12 +89,12 @@ function uct(rootstate, itermax)
         end
 
         if !isempty(node.untried_moves)
-            m = rand(node.untried_moves)
+            m = pop!(node.untried_moves)
             make_move(state, m)
             node = add_child(node, m, state)
         end
 
-        while !isempty(get_moves(state))
+        while !ended(state)
             make_move(state, rand(get_moves(state)))
         end
 
@@ -119,7 +116,7 @@ end
 function play_game(init)
     state = init
     println(state)
-    while !isempty(get_moves(state))
+    while !ended(state)
         if state.just_moved == 0
             m = uct(state, 10000)
         else
