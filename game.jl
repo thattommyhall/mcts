@@ -10,13 +10,7 @@ function clone(state)
 end
 
 function flip_player(state)
-    player = state.just_moved
-    new_player = if player == 0
-        1
-    else
-        0
-    end
-    state.just_moved = new_player
+    state.just_moved = 1 - state.just_moved
 end
 
 function make_move(state, move)
@@ -43,11 +37,7 @@ function ended(state)
 end
 
 function get_result(state, just_moved)
-    if just_moved == state.just_moved
-        1
-    else
-        0
-    end
+    Int64(just_moved == state.just_moved)
 end
 
 mutable struct Node
