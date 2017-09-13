@@ -30,6 +30,21 @@ function get_moves(state)
     result
 end
 
+function rand_move(state)
+    total = sum(state.chips)
+    i = rand(1:total)
+    for (stack, chips) in enumerate(state.chips)
+        if i > chips
+            i -= chips
+        else
+            return (stack, i)
+        end
+    end
+    error("This shouldn't happen")
+end
+
+@assert Set(get_moves(NimState(0, [1,2,3]))) == Set([rand_move(NimState(0, [1,2,3])) for i in 1:100])
+
 function ended(state)
     all(state.chips) do (stack)
         stack == 0
@@ -95,7 +110,7 @@ function uct(rootstate, itermax)
         end
 
         while !ended(state)
-            make_move(state, rand(get_moves(state)))
+            make_move(state, rand_move(state))
         end
 
         while true
