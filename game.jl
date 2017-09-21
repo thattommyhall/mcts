@@ -124,6 +124,15 @@ function uct(rootstate, itermax)
              end
             node = get(node.parent)
         end
+        # if i > 10000
+        #     best_node = reduce(rootnode.children) do a,b
+        #         a.visits > b.visits ? a : b
+        #     end
+        #     if score(best_node, rootnode.visits) > 0.8
+        #         println(score(best_node, get(best_node.parent).visits))
+        #         return best_node
+        #     end
+        # end
     end
     
     best_node = reduce(rootnode.children) do a,b
