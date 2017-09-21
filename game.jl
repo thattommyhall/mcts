@@ -161,9 +161,17 @@ function play_game(init)
     end
 end
 
-for _ in 1:3
-  srand(42)
-  @time play_game(NimState(1, [10, 15]))
+for i in 1:5
+    gc()
+    @time begin
+        # srand(42)
+        init = NimState(1, [5, 30])
+        move = uct(init, 1000000).move
+        println(move)
+        println(make_move(init, move))
+
+
+    end
 end
 
 end
