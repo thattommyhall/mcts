@@ -120,10 +120,11 @@ function uct(rootstate, itermax)
         while true
             update(node, get_result(state, node.just_moved))
             if isnull(node.parent)
-               break
-             end
+                break
+            end
             node = get(node.parent)
         end
+
         # if i > 10000
         #     best_node = reduce(rootnode.children) do a,b
         #         a.visits > b.visits ? a : b
@@ -134,11 +135,14 @@ function uct(rootstate, itermax)
         #     end
         # end
     end
-    
+
     best_node = reduce(rootnode.children) do a,b
-      a.visits > b.visits ? a : b
+        a.visits > b.visits ? a : b
     end
-    best_node.move
+
+    println(score(best_node, get(best_node.parent).visits))
+
+    best_node
 end
 
 function play_game(init)
@@ -146,9 +150,9 @@ function play_game(init)
     println(state)
     while !ended(state)
         if state.just_moved == 0
-            m = uct(state, 10000)
+            m = uct(state, 100000).move
         else
-            m = uct(state, 10000)
+            m = uct(state, 100000).move
         end
         make_move(state, m)
         println(state)
