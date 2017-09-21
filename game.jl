@@ -47,8 +47,6 @@ function rand_move(state)
     get_move(state, i)
 end
 
-@assert Set(get_moves(NimState(0, [1,2,3]))) == Set([rand_move(NimState(0, [1,2,3])) for i in 1:100])
-
 function ended(state)
     all(state.chips) do (stack)
         stack == 0
