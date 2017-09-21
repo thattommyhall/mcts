@@ -30,9 +30,7 @@ function get_moves(state)
     result
 end
 
-function rand_move(state)
-    total = sum(state.chips)
-    i = rand(1:total)
+function get_move(state, i)
     for (stack, chips) in enumerate(state.chips)
         if i > chips
             i -= chips
@@ -41,6 +39,12 @@ function rand_move(state)
         end
     end
     error("This shouldn't happen")
+end
+
+function rand_move(state)
+    total = sum(state.chips)
+    i = rand(1:total)
+    get_move(state, i)
 end
 
 @assert Set(get_moves(NimState(0, [1,2,3]))) == Set([rand_move(NimState(0, [1,2,3])) for i in 1:100])
