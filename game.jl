@@ -1,5 +1,7 @@
 module Game
 
+using StaticArrays
+
 mutable struct NimState
     just_moved::Int64
     chips::Vector{Int64}
@@ -63,23 +65,20 @@ mutable struct Node
     children::Vector{Node}
     wins::Int64
     visits::Int64
-    untried_moves::Vector{Tuple{Int64, Int64}}
     just_moved::Int64
 end
 
-function Node(move,parent,state) 
-  moves = get_moves(state)
-  shuffle!(moves)
-  Node(move, parent, Node[], 0, 0, moves, state.just_moved)
+function Node(move,parent,state)
+    Node(move, parent, Node[], 0, 0, state.just_moved)
 end
-                               
+
 function score(node, parent_visits)
-  node.wins/node.visits + sqrt(2*log(parent_visits)/node.visits)
+    node.wins/node.visits + sqrt(2*log(parent_visits)/node.visits)
 end
 
 function uct_select_child(node)
     reduce(node.children) do a,b
-      score(a, node.visits) > score(b, node.visits) ? a : b
+        score(a, node.visits) > score(b, node.visits) ? a : b
     end
 end
 
@@ -96,19 +95,24 @@ end
 
 function uct(rootstate, itermax)
     rootnode = Node((0,0), Nullable(), rootstate)
+    state = clone(rootstate)
     for i in 1:itermax
         node = rootnode
-        state = clone(rootstate)
 
-        while isempty(node.untried_moves) && !isempty(node.children)
+        state.just_moved = rootstate.just_moved
+        state.chips .= rootstate.chips
+
+        while length(node.children) == sum(state.chips) && !isempty(node.children)
             node = uct_select_child(node)
             make_move(state, node.move)
         end
 
-        if !isempty(node.untried_moves)
-            m = pop!(node.untried_moves)
+        i = length(node.children)
+        if i < sum(state.chips)
+            m = get_move(state, i+1)
             make_move(state, m)
             node = add_child(node, m, state)
+            println("added node")
         end
 
         while !ended(state)
@@ -148,9 +152,9 @@ function play_game(init)
     println(state)
     while !ended(state)
         if state.just_moved == 0
-            m = uct(state, 100000).move
+            m = uct(state, 300000).move
         else
-            m = uct(state, 100000).move
+            m = uct(state, 300000).move
         end
         make_move(state, m)
         println(state)
@@ -163,17 +167,14 @@ function play_game(init)
     end
 end
 
-for i in 1:5
-    gc()
+for i in 1:3
     @time begin
         # srand(42)
-        init = NimState(1, [5, 30])
+        init = NimState(1, [1, 1])
         move = uct(init, 1000000).move
-        println(move)
         println(make_move(init, move))
-
-
     end
+    gc()
 end
 
 end
